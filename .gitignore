@@ -36,3 +36,4 @@ lib/
 build/
 cmake-build-debug/
 .idea/
+include/*.h
