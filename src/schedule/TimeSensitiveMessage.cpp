@@ -17,7 +17,7 @@ TimeSensitiveMessage::TimeSensitiveMessage(
                          minute(minute),
                          durationMinutes(durationMinutes) {
 
-  char buffer[100];
+  char buffer[1024];
 
   this->message = text;
   this->section = section;
@@ -33,15 +33,22 @@ TimeSensitiveMessage::TimeSensitiveMessage(
   timeInfo.tm_min  = minute;
   timeInfo.tm_sec  = 0;
 
-#ifdef DEBUG
   // startingAt is entirely from the input
-  startingAt = mktime(&timeInfo);
-  sprintf(buffer, "Secton: %s, Message: %s, startingAt: %d\n", section, text, startingAt);
+  this->startingAt = mktime(&timeInfo);
+  // endingAt is extra duration
+  this->endingAt = this->startingAt + durationMinutes * 60;
+
+#ifdef DEBUG
+  sprintf(buffer,
+    "Secton [%s] DJ [%s] starts at [%d], done at [%d]\n",
+    this->section,
+    this->message,
+    this->startingAt,
+    this->endingAt);
+
   std::cout << buffer;
 #endif
 
-  // endingAt is extra duration
-  endingAt = startingAt + durationMinutes * 60;
 };
 
 

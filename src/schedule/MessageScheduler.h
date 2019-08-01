@@ -21,15 +21,14 @@ private:
 
 public:
   MessageScheduler();
-
   MessageScheduler *add(TimeSensitiveMessage *message);
 
-  uint32_t size() const;
+  [[nodiscard]] uint32_t size() const;
   TimeSensitiveMessage *currentMessage();
   TimeSensitiveMessage *nextMessageIn(int seconds);
+  [[nodiscard]] TimeSensitiveMessage * messageAt(time_t timestamp) const;
 
   bool isLive();
-
 };
 
 #endif //MESSAGE_SCHEDULER_R

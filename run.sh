@@ -9,7 +9,7 @@ rm -rf build bin lib
 mkdir -p build
 cd build
 cmake ..
-make -j 4 
+make -j 16
 make install
 cd ..
 

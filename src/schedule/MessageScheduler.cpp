@@ -33,6 +33,15 @@ TimeSensitiveMessage *MessageScheduler::currentMessage() {
   return nullptr;
 }
 
+
+TimeSensitiveMessage * MessageScheduler::messageAt(time_t timestamp) const {
+  for (TimeSensitiveMessage *msg : messages) {
+    if (msg != nullptr && msg->isOnAt(timestamp))
+      return msg;
+  }
+  return nullptr;
+}
+
 bool MessageScheduler::isLive() {
   return (nullptr != currentMessage());
 }
