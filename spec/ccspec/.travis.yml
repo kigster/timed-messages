@@ -1,0 +1,37 @@
+language: cpp
+
+compiler:
+  - clang
+  - gcc
+
+sudo: false
+
+addons:
+  apt:
+    sources:
+      - kalakris-cmake
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.6
+    packages:
+      - cmake
+      - clang-3.6
+      - g++-5
+      - cppcheck
+
+before_install:
+  - if [ "$CXX" = "g++" ] && [ $TRAVIS_OS_NAME = "linux" ]; then export CXX="g++-5"; fi
+  - if [ $TRAVIS_OS_NAME = "osx" ]; then brew update; brew install cppcheck; fi
+
+script:
+  - wget https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py && find . -name '*.h' -o -name '*.cc' | xargs python cpplint.py 
+  - cppcheck --enable=all --error-exitcode=1 --inline-suppr --suppress=unmatchedSuppression -I include/ src/ spec/
+  - cd build && cmake .. && make && spec/ccspec_spec
+
+cache: ccache
+
+os:
+  - linux
+  - osx
+
+notifications:
+  email: false
