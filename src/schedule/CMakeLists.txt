@@ -6,12 +6,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
 
 set(SOURCE_FILES
         TimeSensitiveMessage.cpp
-        MessageScheduler.cpp)
+        MessageScheduler.cpp
+        FrolicSchedule.cpp)
 
 set(HEADER_FILES
         TimeSensitiveMessage.h
         MessageScheduler.h
-        )
+        FrolicSchedule.h)
 
 add_library(${PROJECT_LIBRARY} SHARED STATIC ${HEADER_FILES} ${SOURCE_FILES})
 

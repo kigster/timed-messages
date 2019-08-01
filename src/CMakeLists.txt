@@ -7,4 +7,4 @@ set(SOURCE_FILES main.cpp)
 
 add_executable(scheduler ${SOURCE_FILES})
 target_link_libraries(${PROJECT} ${PROJECT_LIBRARY})
-install(TARGETS DESTINATION ${BIN_DIR})
+install(TARGETS scheduler DESTINATION ${BIN_DIR})

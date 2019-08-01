@@ -1,19 +1,20 @@
 
 #include <iostream>
 
-#include "schedule/TimeSensitiveMessage.h"
-#include "schedule/MessageScheduler.h"
+#include "schedule/FrolicSchedule.h"
 
 int main(int argc, const char *argv[]) {
+  time_t now;
+  time(&now);
 
-  TimeSensitiveMessage m1 = TimeSensitiveMessage(2019, 7, 30, 11, 00, 90, "LeftCtrl");
-  TimeSensitiveMessage m2 = TimeSensitiveMessage(2019, 7, 30, 12, 30, 90, "StickyBeats");
+  std::cout << "Current Timestamp is: " << now << "\n";
+  FrolicSchedule frolic = FrolicSchedule();
 
-  MessageScheduler scheduler = MessageScheduler();
+  std::cout << "Frolic X (2019)" << "\n";
 
-  scheduler.add(&m1);
-  scheduler.add(&m2);
+  std::cout << "Total DJ Count : " << frolic.getSchedule().size() << "\n";
+  std::cout << "Current Section: " << frolic.currentSection() << "\n";
+  std::cout << "Current DJ     : " << frolic.currentMessage() << "\n";
 
-  std::cout << "COMPILED!" << "\n";
   return 0;
 }

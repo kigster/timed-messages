@@ -12,22 +12,24 @@
 
 class MessageScheduler {
 private:
+  time_t now;
   TimeSensitiveMessage *messages[MAX_MESSAGE_COUNT]{};
 
   uint32_t
-    __readIndex  = 0, // total count of messages loaded, can not exceed MAX_MESSAGE_COUNT
     __totalCount = 0, // total count of messages loaded, can not exceed MAX_MESSAGE_COUNT
     __addIndex   = 0; // index of the message slot that the next addMessage() will use
-  // if all MAX_MESSAGE_COUNT slots are used, it overwrites the 0's and so on.
 
 public:
-  MessageScheduler() = default;
+  MessageScheduler();
 
   MessageScheduler *add(TimeSensitiveMessage *message);
 
-  uint32_t next();
-  uint32_t current();
-  uint32_t size();
+  uint32_t size() const;
+  TimeSensitiveMessage *currentMessage();
+  TimeSensitiveMessage *nextMessageIn(int seconds);
+
+  bool isLive();
+
 };
 
-#endif //MESSAGE_SCHEDULER_
+#endif //MESSAGE_SCHEDULER_R
