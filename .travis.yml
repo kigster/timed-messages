@@ -13,10 +13,5 @@ install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
 
 script:
-  - mkdir -p build
-  - cd build
-  - cmake ..
-  - make && make install
-  - cd ..
-  - ./bin/scheduler
-  - ./bin/scheduler-specs
+  - ./run.sh
+
