@@ -40,11 +40,11 @@ FrolicSchedule::FrolicSchedule() {
   //   3:15 -  4:30pm  kev/null
   //   4:30 -  6:00pm  Daniel V
 
-  schedule.add(new TimeSensitiveMessage(2019, 8, 3, 3, 0, 90, "bassben", sections[2]));
-  schedule.add(new TimeSensitiveMessage(2019, 8, 3, 4, 30, 90, "rrrus", sections[2]));
-  schedule.add(new TimeSensitiveMessage(2019, 8, 3, 4, 30, 90, "Ghost Squadron", sections[2]));
-  schedule.add(new TimeSensitiveMessage(2019, 8, 3, 4, 30, 90, "kev/null", sections[2]));
-  schedule.add(new TimeSensitiveMessage(2019, 8, 3, 4, 30, 90, "Daniel V", sections[2]));
+  schedule.add(new TimeSensitiveMessage(2019, 8, 3, 11, 30, 75, "bassben", sections[2]));
+  schedule.add(new TimeSensitiveMessage(2019, 8, 3, 12, 45, 75, "rrrus", sections[2]));
+  schedule.add(new TimeSensitiveMessage(2019, 8, 3,  2,  0, 75, "Ghost Squadron", sections[2]));
+  schedule.add(new TimeSensitiveMessage(2019, 8, 3,  3, 15, 75, "kev/null", sections[2]));
+  schedule.add(new TimeSensitiveMessage(2019, 8, 3,  4, 30, 90, "Daniel V", sections[2]));
 
   // Saturday - Night
   //
