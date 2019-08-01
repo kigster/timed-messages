@@ -1,4 +1,9 @@
-# CMake/C++ Project Template with CCSpec as Submodule
+# Timed Message Scheduler Library
+
+
+This library uses CMake and a CCSpec project for automated tests.
+
+#### CMake/C++ Project Template with CCSpec as Submodule
 
 This project is a derivative of [ccspec-example](https://github.com/zhangsu/ccspec-example/) project, however this repo fixes some compilation and build issues in the original repo.
 
