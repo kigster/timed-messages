@@ -1,5 +1,6 @@
 # Timed Message Scheduler Library
 
+[![Build Status](https://travis-ci.org/kigster/timed-messages.svg?branch=master)](https://travis-ci.org/kigster/timed-messages)
 
 This library uses CMake and a CCSpec project for automated tests.
 
