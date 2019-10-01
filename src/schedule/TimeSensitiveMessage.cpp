@@ -16,9 +16,6 @@ TimeSensitiveMessage::TimeSensitiveMessage(
                          hour(hour),
                          minute(minute),
                          durationMinutes(durationMinutes) {
-
-  char buffer[1024];
-
   this->message = text;
   this->section = section;
 
@@ -39,6 +36,8 @@ TimeSensitiveMessage::TimeSensitiveMessage(
   this->endingAt = this->startingAt + durationMinutes * 60;
 
 #ifdef DEBUG
+  char buffer[1024];
+  
   sprintf(buffer,
     "Secton [%s] DJ [%s] starts at [%d], done at [%d]\n",
     this->section,
