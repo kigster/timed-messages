@@ -4,63 +4,65 @@
 
 source ~/.bashmatic/init.sh
 
+export script=$(basename $0)
 export arch=$(uname -m)
+export LD_LIBRARY_PATH=$(pwd)/lib
 
-function Actions::setup() {
-  run "git submodule init"
-  run "git submodule update"
-
-  run "rm -rf build bin lib"
-  run "mkdir -p build"
-}
-
-function Actions::build() {
-  run "cd build && cmake .."
-
-  run::set-next show-output-on
-  run "make -j 16"
-
-  run "make install"
-  run "cd .. "
-}
-
-function Actions::run() {
-  export LD_LIBRARY_PATH=$(pwd)/lib
-  info "setting LD_LIBRARY_PATH to ${bldgrn}${LD_LIBRARY_PATH}"
-
-  # now run the tests
-  for binary in $(find bin -type f -perm -111); do
-    run::set-next show-output-on
-    run "${binary}"
-  done
-}
+# Supporting
 
 function OS::Customization::ubuntu() {
   # remove -stdlib flag for clang compilers
   find . -name '*.txt' | xargs sed -i '' -e 's/-stdlib=libc++//g'
 }
 
-function Actions::main() {
-  run::set-all abort-on-error
+# Actions
 
+function Actions::setup() {
   Actions::clean
-  Actions::setup
-  Actions::build
 
-  local os=(uname -s)
-  local func="OS::Customization::${os}"
-  [[ -n $(type ${func} 2>/dev/null) ]] && ${func}
+  run "git submodule init"
+  run "git submodule update"
+  run "mkdir -p build"
+}
 
-  Actions::link
-  Actions::run
+function Actions::compile() {
+  [[ -d build ]] || Actions::setup
+  run "cd build && cmake .."
+  run::set-next show-output-on
+  run "make -j 16"
+  run "make install"
+  run "cd .. "
+}
+
+function Actions::run() {
+  local target="$1"
+  
+  h1 "Please remmeber to set ${bldylw}LD_LIBRARY_PATH${clr} to ${bldgrn}${LD_LIBRARY_PATH}"
+  echo
+
+  # now run the tests and the command
+  for binary in $(find bin -type f -perm -111); do
+    [[ -n ${target} && "${target}" != "$(basename ${binary})" ]] && continue
+
+    run::set-next show-output-on
+    hl::subtle "Running ${binary}..."
+    run "${binary}"
+  done
 }
 
 function Actions::link() {
+  Actions::link-binaries
+  Actions::link-libraries
+}
+
+function Actions::link-binaries() {
   # binaries
   for file in $(find ./bin -perm 755); do
     run "ln -nfs ${file/\/bin/} bin/$(basename ${file})"
   done
+}
 
+function Actions::link-libraries() {
   # libraries
   for file in $(find . -name 'lib*' -type f); do
     run "ln -nfs $(pwd)${file/\./} lib/$(basename ${file})"
@@ -71,15 +73,35 @@ function Actions::clean() {
   run "rm -rf bin lib include build"
 }
 
-declare -a actions=(  $(lib::util::functions-matching 'Actions::') )
+function Actions::usage() {
+  printf "
+${bldgrn}USAGE${clr}
+  ${bldylw}${script} [ action ] ${clr}
 
-function usage() {
-  echo "
-USAGE
-  $0 $(array-piped ${actions[@]})
+${bldgrn}EG: ${clr}
+  ${bldylw}${script} [ $(array-piped ${actions[@]}) ] ${clr}
+
+${bldgrn}DESCRIPTION  ${clr}
+  Builds and runs project and it's tests.
+
 "
 }
 
+function Actions::all() {
+  run::set-all abort-on-error
+  Actions::clean
+  Actions::setup
+  Actions::compile
+
+  local os=(uname -s)
+  local func="OS::Customization::${os}"
+  [[ -n $(type ${func} 2>/dev/null) ]] && ${func}
+
+  Actions::link
+  Actions::run
+}
+
+declare -a actions=(  $(lib::util::functions-matching 'Actions::') )
 
 # Parse additional flags
 while :; do
@@ -106,7 +128,7 @@ while :; do
   esac
 done
 
-[[ -z ${action} ]] && action="main"
+[[ -z ${action} ]] && action="usage"
 
 lib::array::contains-element "${action}" "${actions[@]}" || {
   error "Action is not valid: ${action}" "Allowed actions are: $(array-csv "${actions[@]}")"
