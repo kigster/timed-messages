@@ -14,23 +14,53 @@ It provides a simple C++ project template that integrates with the [ccspec](http
 
  * [CMake Project Template](https://github.com/kigster/cmake-project-template) project that uses the [Google Test Library](https://github.com/google/googletest).
 
+
+## Prerequisites
+
+ 1. Please install XCode Tools: `xcode-select --install`
+ 2. Install HomeBrew — following [instructions here](https://brew.sh).
+ 3. Install CMake — `brew install cmake`,
+ 4. Install `direnv` — `brew install direnv`, and then `echo 'eval "$(direnv hook bash)"' >> ~/.bashrc`
+
+Now, start a new terminal so that it will load `direnv`, and `cd` into the project folder.
+
+You should see the following warning message:
+
+```
+> cd ~/cmake-ccspec-template
+direnv: error .envrc is blocked. Run `direnv allow` to approve its content
+> 
+```
+
+This is normal. To fix this, run the following command:
+
+```bash
+direnv allow .
+```
+
+From now on, `sbin` and `bin` folders inside the project will be automatically in your PATH anytime you enter the project.
+
 ## Usage
 
-You need to have:
-
- * recent C++ compiler that supports C++17
- * recent `cmake` installed
-
- First, clone the project into a folder:
+Ensure you have `git` command installed, and then run:
 
 ```bash
 $ git clone https://github.com/kigster/cmake-ccspec-template
 $ cd cmake-ccspec-template
 ```
 
-### Automated Build
+### Using Automated Build
 
-You can use the provided BASH script `./run.sh` to build and run all the tests.
+You can use the provided BASH script `sbin/build` to build and run all the tests.
+
+Examples (NOTE: we run `build` without `sbin/build` because of the `direnv` setup we did earlier.' If you skipped this part, you will need to change `build` with `sbin/build` below:
+
+```bash
+$ build
+$ build build
+$ build run
+$ build clean
+```
 
 ### Manual Build
 

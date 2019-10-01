@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+[[ -d ~/.bashmatic ]] || git clone https://github.com/kigster/bashmatic ~/.bashmatic
+
+source ~/.bashmatic/init.sh
+
+export arch=$(uname -m)
+
+function Actions::setup() {
+  run "git submodule init"
+  run "git submodule update"
+
+  run "rm -rf build bin lib"
+  run "mkdir -p build"
+}
+
+function Actions::build() {
+  run "cd build && cmake .."
+
+  run::set-next show-output-on
+  run "make -j 16"
+
+  run "make install"
+  run "cd .. "
+}
+
+function Actions::run() {
+  export LD_LIBRARY_PATH=$(pwd)/lib
+  info "setting LD_LIBRARY_PATH to ${bldgrn}${LD_LIBRARY_PATH}"
+
+  # now run the tests
+  for binary in $(find bin -type f -perm -111); do
+    run::set-next show-output-on
+    run "${binary}"
+  done
+}
+
+function OS::Customization::ubuntu() {
+  # remove -stdlib flag for clang compilers
+  find . -name '*.txt' | xargs sed -i '' -e 's/-stdlib=libc++//g'
+}
+
+function Actions::main() {
+  run::set-all abort-on-error
+
+  Actions::clean
+  Actions::setup
+  Actions::build
+
+  local os=(uname -s)
+  local func="OS::Customization::${os}"
+  [[ -n $(type ${func} 2>/dev/null) ]] && ${func}
+
+  Actions::link
+  Actions::run
+}
+
+function Actions::link() {
+  # binaries
+  for file in $(find ./bin -perm 755); do
+    run "ln -nfs ${file/\/bin/} bin/$(basename ${file})"
+  done
+
+  # libraries
+  for file in $(find . -name 'lib*' -type f); do
+    run "ln -nfs $(pwd)${file/\./} lib/$(basename ${file})"
+  done
+}
+
+function Actions::clean() {
+  run "rm -rf bin lib include build"
+}
+
+declare -a actions=(  $(lib::util::functions-matching 'Actions::') )
+
+function usage() {
+  echo "
+USAGE
+  $0 $(array-piped ${actions[@]})
+"
+}
+
+
+# Parse additional flags
+while :; do
+  case $1 in
+    -h|-\?|--help)
+      shift
+      usage
+      exit 0
+      ;;
+    --) # End of all options; anything after will be passed to the action function
+      shift
+      break
+      ;;
+    -?*)
+      printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+      exit 127
+      shift
+      ;;
+    *)
+      [[ -z "$1" ]] && break
+      [[ -n "$1" ]] && { action="$1"; shift; }
+      break
+      ;;
+  esac
+done
+
+[[ -z ${action} ]] && action="main"
+
+lib::array::contains-element "${action}" "${actions[@]}" || {
+  error "Action is not valid: ${action}" "Allowed actions are: $(array-csv "${actions[@]}")"
+  exit 1
+}
+
+Actions::${action} "$@"
