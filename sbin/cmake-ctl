@@ -6,15 +6,12 @@ source ~/.bashmatic/init.sh
 
 export script=$(basename $0)
 export arch=$(uname -m)
+export os=$(uname -s)
+
 export LD_LIBRARY_PATH=$(pwd)/lib
 
-# Supporting
-
-function OS::Customization::ubuntu() {
-  # remove -stdlib flag for clang compilers
-  find . -name '*.txt' | xargs sed -i '' -e 's/-stdlib=libc++//g'
-}
-
+# Supporting functions for each OS
+#
 # Actions
 
 function Actions::setup() {
@@ -23,6 +20,13 @@ function Actions::setup() {
   run "git submodule init"
   run "git submodule update"
   run "mkdir -p build"
+
+  lib::util::call-if-function "Actions::setup::${os}"
+}
+
+function Actions::setup:ubuntu() {
+  # remove -stdlib flag for clang compilers
+  find . -name '*.txt' | xargs sed -i '' -e 's/-stdlib=libc++//g'
 }
 
 function Actions::compile() {
@@ -32,11 +36,13 @@ function Actions::compile() {
   run "make -j 16"
   run "make install"
   run "cd .. "
+
+  lib::util::call-if-function "Actions::compile::${os}"
 }
 
 function Actions::run() {
   local target="$1"
-  
+
   h1 "Please remmeber to set ${bldylw}LD_LIBRARY_PATH${clr} to ${bldgrn}${LD_LIBRARY_PATH}"
   echo
 
@@ -50,19 +56,19 @@ function Actions::run() {
   done
 }
 
-function Actions::link() {
-  Actions::link-binaries
-  Actions::link-libraries
+function Helpers::link() {
+  Helpers::link-binaries
+  Helpers::link-libraries
 }
 
-function Actions::link-binaries() {
+function Helpers::link-binaries() {
   # binaries
   for file in $(find ./bin -perm 755); do
     run "ln -nfs ${file/\/bin/} bin/$(basename ${file})"
   done
 }
 
-function Actions::link-libraries() {
+function Helpers::link-libraries() {
   # libraries
   for file in $(find . -name 'lib*' -type f); do
     run "ln -nfs $(pwd)${file/\./} lib/$(basename ${file})"
@@ -84,55 +90,64 @@ ${bldgrn}EG: ${clr}
 ${bldgrn}DESCRIPTION  ${clr}
   Builds and runs project and it's tests.
 
-"
+  "
 }
 
 function Actions::all() {
   run::set-all abort-on-error
+
   Actions::clean
   Actions::setup
   Actions::compile
-
-  local os=(uname -s)
-  local func="OS::Customization::${os}"
-  [[ -n $(type ${func} 2>/dev/null) ]] && ${func}
-
-  Actions::link
+  Helpers::link
   Actions::run
 }
 
-declare -a actions=(  $(lib::util::functions-matching 'Actions::') )
 
-# Parse additional flags
-while :; do
-  case $1 in
-    -h|-\?|--help)
-      shift
-      usage
-      exit 0
-      ;;
-    --) # End of all options; anything after will be passed to the action function
-      shift
-      break
-      ;;
-    -?*)
-      printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
-      exit 127
-      shift
-      ;;
-    *)
-      [[ -z "$1" ]] && break
-      [[ -n "$1" ]] && { action="$1"; shift; }
-      break
-      ;;
-  esac
-done
+#——————————————————————————————————————————————————————————————————————————————
 
-[[ -z ${action} ]] && action="usage"
+declare -a actions=(  $(lib::util::functions-matching 'Actions::' ) )
 
-lib::array::contains-element "${action}" "${actions[@]}" || {
-  error "Action is not valid: ${action}" "Allowed actions are: $(array-csv "${actions[@]}")"
-  exit 1
+function Helpers::parse() {
+  # Parse additional flags
+  while :; do
+    case $1 in
+      -h|-\?|--help)
+        shift
+        usage
+        exit 0
+        ;;
+      --) # End of all options; anything after will be passed to the action function
+        shift
+        break
+        ;;
+      -?*)
+        printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+        exit 127
+        shift
+        ;;
+      *)
+        [[ -z "$1" ]] && break
+        [[ -n "$1" ]] && { action="$1"; shift; }
+        break
+        ;;
+    esac
+  done
+
+  [[ -z ${action} ]] && action="usage"
+
+  lib::array::contains-element "${action}" "${actions[@]}" || {
+    error "Action is not valid: ${action}" "Allowed actions are: $(array-csv "${actions[@]}")"
+    exit 1
+  }
+
+  printf "%s" "${action}"
 }
 
-Actions::${action} "$@"
+function main() {
+  local func="Actions::$(Helpers::parse "$@")"
+  lib::util::call-if-function "${func}"
+}
+
+main "$@"
+
