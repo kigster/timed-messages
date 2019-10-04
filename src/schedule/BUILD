@@ -1,5 +1,5 @@
 cc_library(
-    name = "schedule",
+    name = "lib",
     srcs = glob(["*.cpp"]),
     hdrs = glob(["*.h"]),
     visibility = ["//visibility:public"],

@@ -4,7 +4,7 @@ cc_binary(
     includes = ["ccspec/include"],
     visibility = ["//visibility:public"],
     deps = [
-       "//src/schedule:schedule",
+       "//src/schedule:lib",
        "//spec/ccspec:libccspec"
    ],
 )
